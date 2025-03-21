@@ -1,5 +1,7 @@
 import sqlite3
 import pandas as pd
+import html
+import json
 
 from env import DATABASE_PATH
 
@@ -72,3 +74,40 @@ class DatabaseManager:
         categories = [row[0] for row in self.cursor.execute(query).fetchall()]
         self.close()
         return categories
+    
+    def insert_question(self, standardized_question):
+        """
+        Insère une question au format standard :
+        {
+            "question": str,
+            "correct_answer": str,
+            "incorrect_answers": list[str],
+            "category": str,
+            "difficulty": str,
+            "type": str,
+            "source": str
+        }
+        """
+        try:
+            self.execute("""
+            INSERT INTO questions (
+                question, correct_answer, incorrect_answers,
+                category, difficulty, type, source
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                html.unescape(standardized_question["question"]),
+                html.unescape(standardized_question["correct_answer"]),
+                json.dumps(standardized_question["incorrect_answers"]),
+                standardized_question.get("category", ""),
+                standardized_question.get("difficulty", ""),
+                standardized_question.get("type", ""),
+                standardized_question.get("source", "unknown")
+            ))
+            return True
+        except sqlite3.IntegrityError:
+            return False
+        
+    def question_exists(self, question_text):
+        """Vérifie si une question existe déjà dans la base de données"""
+        self.execute("SELECT 1 FROM questions WHERE question = ?", (question_text,))
+        return self.cursor.fetchone() is not None

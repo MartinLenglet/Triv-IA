@@ -1,1 +1,2 @@
 from .open_trivia_db import TriviaSQLiteManager
+from .the_trivia_api import TheTriviaAPISQLiteManager

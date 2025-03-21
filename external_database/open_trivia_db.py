@@ -6,39 +6,7 @@ from time import sleep
 
 from .database_manager import DatabaseManager
 
-class TriviaSQLiteManager(DatabaseManager):
-    def insert_question(self, standardized_question):
-        """
-        Insère une question au format standard :
-        {
-            "question": str,
-            "correct_answer": str,
-            "incorrect_answers": list[str],
-            "category": str,
-            "difficulty": str,
-            "type": str,
-            "source": str
-        }
-        """
-        try:
-            self.execute("""
-            INSERT INTO questions (
-                question, correct_answer, incorrect_answers,
-                category, difficulty, type, source
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
-                html.unescape(standardized_question["question"]),
-                html.unescape(standardized_question["correct_answer"]),
-                json.dumps(standardized_question["incorrect_answers"]),
-                standardized_question.get("category", ""),
-                standardized_question.get("difficulty", ""),
-                standardized_question.get("type", ""),
-                standardized_question.get("source", "unknown")
-            ))
-            return True
-        except sqlite3.IntegrityError:
-            return False
-        
+class TriviaSQLiteManager(DatabaseManager):        
     def get_categories(self):
         res = requests.get("https://opentdb.com/api_category.php")
         return res.json()['trivia_categories'] if res.status_code == 200 else []
@@ -49,7 +17,6 @@ class TriviaSQLiteManager(DatabaseManager):
             print(f"📚 Catégorie : {cat['name']}")
             amounts = [50, 20, 10, 5, 1]
             amout_idx = 0
-            seen = set()
 
             while True:
                 url = f"https://opentdb.com/api.php?amount={amounts[amout_idx]}&category={cat['id']}&type=multiple&token={self.token}"
@@ -64,10 +31,11 @@ class TriviaSQLiteManager(DatabaseManager):
 
                     new = 0
                     for q in questions:
-                        if q["question"] in seen:
-                            continue
-                        seen.add(q["question"])
                         standardize_question = self.standardize_opentdb_question(q)
+
+                        if self.question_exists(standardize_question["question"]):
+                            continue
+
                         if self.insert_question(standardize_question):
                             new += 1
 
