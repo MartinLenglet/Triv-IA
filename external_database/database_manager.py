@@ -1,4 +1,5 @@
 import sqlite3
+import pandas as pd
 
 from env import DATABASE_PATH
 
@@ -48,3 +49,26 @@ class DatabaseManager:
         )
         """)
         self.commit()
+
+    def load_questions_as_dataframe(self, search_term=""):
+        """Charge les questions depuis la base sous forme de DataFrame, avec filtre facultatif"""
+        self.connect()
+        query = """
+            SELECT question, correct_answer, incorrect_answers, category, difficulty, type, source
+            FROM questions
+        """
+        df = pd.read_sql_query(query, self.conn)
+        self.close()
+
+        if search_term:
+            df = df[df["question"].str.contains(search_term, case=False, na=False)]
+
+        return df
+    
+    def get_all_categories(self) -> list:
+        """Retourne la liste des catégories distinctes"""
+        self.connect()
+        query = "SELECT DISTINCT category FROM questions ORDER BY category"
+        categories = [row[0] for row in self.cursor.execute(query).fetchall()]
+        self.close()
+        return categories

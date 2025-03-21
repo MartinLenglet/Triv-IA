@@ -66,7 +66,7 @@ class RerankerModel(ModelLoader):
         if self.do_normalize_score:
             score = self.normalize_score(score)
 
-        return score
+        return round(score, 3)
     
     def normalize_score(self, score: float):
         return 1 / (1 + np.exp(-score)) # sigmoid
