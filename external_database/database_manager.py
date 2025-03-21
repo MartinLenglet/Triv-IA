@@ -56,7 +56,7 @@ class DatabaseManager:
         """Charge les questions depuis la base sous forme de DataFrame, avec filtre facultatif"""
         self.connect()
         query = """
-            SELECT question, correct_answer, incorrect_answers, category, difficulty, type, source
+            SELECT question, correct_answer, incorrect_answers, category, difficulty, source
             FROM questions
         """
         df = pd.read_sql_query(query, self.conn)

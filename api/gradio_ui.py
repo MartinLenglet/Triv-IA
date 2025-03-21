@@ -37,7 +37,7 @@ class GradioUI():
         reranked_df = pd.DataFrame(reranked_questions_dict)
 
         merged_df = pd.merge(reranked_df, all_questions_df, on="question", how="left")
-        columns = ["score", "question", "correct_answer", "incorrect_answers", "category", "difficulty", "type", "source"]
+        columns = ["score", "question", "correct_answer", "incorrect_answers", "category", "difficulty", "source"]
         merged_df = merged_df.sort_values(by="score", ascending=False)
 
         return gr.update(value=merged_df[columns])
@@ -51,12 +51,12 @@ class GradioUI():
                 
                 with gr.Row():
                     data_output = gr.Dataframe(
-                        headers=["Question", "Bonne réponse", "Mauvaises réponses", "Catégorie", "Difficulté", "Type", "Source"],
+                        headers=["Question", "Bonne réponse", "Mauvaises réponses", "Catégorie", "Difficulté", "Source"],
                         value=self.db_manager.load_questions_as_dataframe(),
                         interactive=False,
                         row_count=5,
-                        datatype=["str"] * 7,
-                        column_widths=["35%", "20%", "15%", "10%", "7%", "7%", "6%"],
+                        datatype=["str"] * 6,
+                        column_widths=["41%", "20%", "15%", "10%", "7%", "7%"],
                         show_search="search",
                         wrap=True,
                     )
@@ -75,12 +75,12 @@ class GradioUI():
 
                 with gr.Row():
                     data_output_semantic_search = gr.Dataframe(
-                        headers=["Score", "Question", "Bonne réponse", "Mauvaises réponses", "Catégorie", "Difficulté", "Type", "Source"],
+                        headers=["Score", "Question", "Bonne réponse", "Mauvaises réponses", "Catégorie", "Difficulté", "Source"],
                         interactive=False,
                         wrap=True,
                         row_count=30,
-                        datatype=["str"] * 8,
-                        column_widths=["5%", "35%", "20%", "10%", "10%", "7%", "7%", "6%"],
+                        datatype=["str"] * 7,
+                        column_widths=["5%", "41%", "20%", "10%", "10%", "7%", "7%"],
                         show_search="search",
                     )
 
