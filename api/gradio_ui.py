@@ -33,12 +33,15 @@ class GradioUI():
         question_texts = all_questions_df["question"].tolist()
 
         reranked_questions, scores = self.reranker_model.rerank_questions(theme, question_texts)
-        reranked_questions_dict = [{"question": question, "score": score} for question, score in zip (reranked_questions, scores)]
+        reranked_questions_dict = [{"question": question, "score": round(score, 3)} for question, score in zip (reranked_questions, scores)]
         reranked_df = pd.DataFrame(reranked_questions_dict)
 
         merged_df = pd.merge(reranked_df, all_questions_df, on="question", how="left")
         columns = ["score", "question", "correct_answer", "incorrect_answers", "category", "difficulty", "source"]
         merged_df = merged_df.sort_values(by="score", ascending=False)
+
+        # Convertir les scores en chaînes de caractères avec trois décimales pour Gradio
+        merged_df['score'] = merged_df['score'].apply(lambda x: f"{x:.3f}")
 
         return gr.update(value=merged_df[columns])
     
